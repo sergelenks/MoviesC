@@ -71,6 +71,62 @@ struct movie* processInputFile(char* filePath) {
     return head;
 }
 
+void printMoviesByYear(struct movie* list) {
+    if (list == NULL) {
+        printf("No movies data available\n");
+        return;
+    }
+
+    int year;
+    printf("Enter the year for which you want to see movies: ");
+    scanf("%d", &year);
+    while (getchar() != '\n');  
+
+    struct movie* current = list;
+    int count = 0;
+    
+    while (current != NULL) {
+        if (current->year == year) {
+            printf("%d. %s\n", ++count, current->title);
+        }
+        current = current->next;
+    }
+    
+    if (count == 0) {
+        printf("No data about movies released in the year %d\n", year);
+    }
+}
+
+void printHighestRated(struct movie* list) {
+    if (list == NULL) {
+        printf("No movies data available\n");
+        return;
+    }
+
+    struct movie* current = list;
+    int lastYear = -1; 
+    
+    while (current != NULL) {
+        if (current->year != lastYear) {
+            float rating = current->rating;
+            char* title = current->title;
+            
+            struct movie* temp = current->next;
+            while (temp != NULL) {
+                if (temp->year == current->year && temp->rating > rating) {
+                    rating = temp->rating;
+                    title = temp->title;
+                }
+                temp = temp->next;
+            }
+            
+            printf("%d %.1f %s\n", current->year, rating, title);
+            lastYear = current->year;
+        }
+        current = current->next;
+    }
+}
+
 int main (int argc, char *argv[]){
     if (argc < 2)
     {

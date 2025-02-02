@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct movie* createMovie(char* title, int year, char* languages, double rating);
+struct movie* processInputFile(char* filePath);
+void bySpecifiedYear(struct movie* list);
+void byHighestRating(struct movie* list);
+void byLanguage(struct movie* list);
+
 struct movie {
     char* title;
     int year;
@@ -9,6 +15,58 @@ struct movie {
     double rating;
     struct movie* next;
 };
+
+
+int main (int argc, char *argv[]){
+    if (argc < 2)
+    {
+        printf("You must provide the name of the file to process\n");
+        return EXIT_FAILURE;
+    }
+
+    struct movie* movies = processInputFile(argv[1]);
+    if (movies == NULL) { return 1; }
+
+    int choice;
+    do {
+        printf("\n1. Show movies released in the specified year\n");
+        printf("2. Show highest rated movie for each year\n");
+        printf("3. Show the title and year of release of all movies in a specific language\n");
+        printf("4. Exit from the program\n");
+        printf("\nEnter a choice from 1 to 4: ");
+        
+        scanf("%d", &choice);
+        while (getchar() != '\n');  
+
+        switch (choice) {
+            case 1:
+                bySpecifiedYear(movies);
+                break;
+            case 2:
+                byHighestRating(movies);
+                break;
+            case 3:
+                byLanguage(movies);
+                break;
+            case 4:
+                printf("Exiting program, bye for now\n");
+                break;
+            default:
+                printf("You entered an incorrect choice. Try again.\n");
+        }
+    } while (choice != 4);
+
+    struct movie* current = movies;
+    while (current != NULL) {
+        struct movie* temp = current;
+        current = current->next;
+        free(temp->title);
+        free(temp->languages);
+        free(temp);
+    }
+
+    return EXIT_SUCCESS;
+}
 
 struct movie* createMovie(char* title, int year, char* languages, double rating) {
     struct movie* movie = malloc(sizeof(struct movie));
@@ -71,9 +129,9 @@ struct movie* processInputFile(char* filePath) {
     return head;
 }
 
-void printMoviesByYear(struct movie* list) {
+void bySpecifiedYear(struct movie* list) {
     if (list == NULL) {
-        printf("No movies data available\n");
+        printf("Data unavailable\n");
         return;
     }
 
@@ -97,9 +155,9 @@ void printMoviesByYear(struct movie* list) {
     }
 }
 
-void printHighestRated(struct movie* list) {
+void byHighestRating(struct movie* list) {
     if (list == NULL) {
-        printf("No movies data available\n");
+        printf("Data unavailable\n");
         return;
     }
 
@@ -127,16 +185,29 @@ void printHighestRated(struct movie* list) {
     }
 }
 
-int main (int argc, char *argv[]){
-    if (argc < 2)
-    {
-        printf("You must provide the name of the file to process\n");
-        return EXIT_FAILURE;
+void byLanguage(struct movie* list) {
+    if (list == NULL) {
+        printf("Data unavailable\n");
+        return;
     }
 
-    struct movie* list = processInputFile(argv[1]);
-    if (list == NULL) { return 1; }
+    char language[50];
+    printf("Enter the language for which you want to see movies: ");
+    scanf("%s", language);
+    while (getchar() != '\n');
 
+    struct movie* current = list;
+    int count = 0;
 
-    return EXIT_SUCCESS;
+    while (current != NULL) {
+        if (strstr(current->languages, language) != NULL) {
+            printf("%d %s\n", current->year, current->title);
+            count++;
+        }
+        current = current->next;
+    }
+
+    if (count == 0) {
+        printf("No data about movies released in %s\n", language);
+    }
 }
